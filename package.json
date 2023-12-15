@@ -1,0 +1,22 @@
+{
+  "name": "statbuddy_minecraft",
+  "version": "1.0.0",
+  "description": "Discord Bot that interfaces with Minecraft servers for statistics through RCON",
+  "main": "MinecraftStatBuddy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carterray31001/Minecraft_StatBuddy.git"
+  },
+  "author": "Carter Ray",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carterray31001/Minecraft_StatBuddy/issues"
+  },
+  "homepage": "https://github.com/carterray31001/Minecraft_StatBuddy#readme",
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  }
+}
