@@ -6,9 +6,10 @@ use serenity::model::application::ResolvedOption;
 use tokio::net::lookup_host;
 
 pub async fn run(_options: &[ResolvedOption<'_>]) -> Option<String> {
-    let hostname: String = env::var("SERVER")
+    let hostname: String = env::var("GLOBAL_SERVER_ADDR")
         .expect("Expected a server address in the environment");
-    let x = match lookup_host(&hostname).await {
+
+    let x: Option<String> = match lookup_host(&hostname).await {
         Ok(mut ip) => {
             let ip_addr = ip.next().unwrap().to_string();
             println!("{:#?}", ip_addr);

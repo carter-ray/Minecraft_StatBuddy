@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-std = "1.13.0"
 dotenv = "0.15.0"
+rcon = "0.6.0"
 serenity = "0.12.4"
+sqlx = { version = "=0.8.3", features = ["sqlite", "macros", "runtime-tokio"] }
 tokio = { version = "1.43.0", features = ["full"] }
