@@ -4,7 +4,7 @@ use serenity::builder::CreateCommand;
 use serenity::model::application::ResolvedOption;
 
 pub async fn run(_options: &[ResolvedOption<'_>]) -> Option<String> {
-    Some("uh oh".to_string())
+    Some("TODO".to_string())
 }
 
 pub fn register() -> CreateCommand {

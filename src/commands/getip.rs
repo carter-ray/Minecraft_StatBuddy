@@ -11,7 +11,7 @@ pub async fn run(_options: &[ResolvedOption<'_>]) -> Option<String> {
 
     let x: Option<String> = match lookup_host(&hostname).await {
         Ok(mut ip) => {
-            let ip_addr = ip.next().unwrap().to_string();
+            let ip_addr: String = ip.next().unwrap().to_string();
             println!("{:#?}", ip_addr);
             let output = format!("Resolved {:#?} to {:#?}", hostname, ip_addr);
             Some(output)
