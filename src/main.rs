@@ -1,7 +1,8 @@
 mod commands;
+mod db;
 
-use std::net::TcpStream;
 use std::{env, time};
+use db::update_db;
 use dotenv::dotenv;
 
 use serenity::async_trait;
@@ -10,8 +11,6 @@ use serenity::model::application::Interaction;
 use serenity::model::gateway::Ready;
 use serenity::model::id::GuildId;
 use serenity::prelude::*;
-
-use sqlx::Row;
 
 struct Handler;
 
@@ -25,6 +24,7 @@ impl EventHandler for Handler {
 
             let content = match command.data.name.as_str() {
                 "get_ip" => commands::getip::run(&command.data.options()).await,
+                "get_stat" => commands::getstat::run(&command.data.options()).await,
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -51,10 +51,13 @@ impl EventHandler for Handler {
         let commands = guild_id
             .set_commands(&ctx.http, vec![
                 commands::getip::register(),
+                commands::getstat::register(),
             ])
             .await;
-
-        println!("I now have the following guild slash commands: {commands:#?}");
+        match commands {
+            Ok(_) => println!("Commands registered"),
+            Err(e) => panic!("Commands not registered: {}", e)
+        }
         
     }
 }
@@ -68,11 +71,6 @@ async fn main() {
         .expect("Expected a token in the environment");
 
     tokio::spawn(async {
-        let db_name: String = env::var("DATABASE_URL")
-        .expect("Expected a database URL");
-    
-        println!("DB name: {}", db_name);
-
         let database: sqlx::SqlitePool = sqlx::sqlite::SqlitePoolOptions::new()
             .max_connections(5)
             .connect_with(
@@ -112,53 +110,4 @@ async fn main() {
     }
 }
 
-async fn update_db(database: &sqlx::SqlitePool) {
-    let addr_port: String = env::var("LOCAL_ADDR")
-        .expect("Expected an rcon address:port in the environment");
-    
-    let _rcon_pw: String = env::var("RCON_PW")
-        .expect("Expected an rcon password in the environment");
-
-    let result = sqlx::query("SELECT username FROM statistics;")
-        .fetch_all(database).await
-        .unwrap();
-
-        
-    let mut usernames: Vec<&str> = Vec::with_capacity(result.len());
-    for row in result.iter() {
-        let username: &str = row.try_get("username").unwrap();
-        usernames.push(username);
-    }
-
-    println!("Usernames: {:#?}", usernames);
-
-    let tcp_stream: Result<TcpStream, std::io::Error> = TcpStream::connect(&addr_port);
-    match tcp_stream {
-        Ok(_stream) => {
-
-            println!("Connected to RCON server")
-            
-
-            // Connection::cmd(&mut self, "")
-        },
-        Err(_) => panic!("Could not connect to RCON server {}", &addr_port)
-    }
-
-
-    // let task_description = task_description.trim();
-    // // That's how we are going to use a sqlite command.
-    // // We are inserting into the todo table, our task_description in task column and our
-    // // user_id in user_Id column.
-    // sqlx::query!(
-    //     "INSERT INTO todo (task, user_id) VALUES (?, ?)",
-    //     task_description,
-    //     user_id,
-    // )
-    // .execute(&self.database) // < Where the command will be executed
-    // .await
-    // .unwrap();
-
-    // let response = format!("Successfully added `{task_description}` to your todo list");
-    // msg.channel_id.say(&ctx, response).await.unwrap();
-}
 

@@ -25,5 +25,6 @@ pub async fn run(_options: &[ResolvedOption<'_>]) -> Option<String> {
 }
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("get_ip").description("Gets IP of server")
+    CreateCommand::new("get_ip")
+        .description("Gets IP of server")
 }
