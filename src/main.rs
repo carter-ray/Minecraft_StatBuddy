@@ -1,25 +1,20 @@
 mod commands;
 mod dbfuncs;
 mod rconfuncs;
+pub mod constants;
 
 use std::{env, time};
-use dbfuncs::update_db;
+use dbfuncs::{init_db, update_db};
 use dotenv::dotenv;
 
 use serenity::async_trait;
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage};
-use once_cell::sync::Lazy;
 use serenity::model::application::Interaction;
 use serenity::model::gateway::Ready;
 use serenity::model::id::GuildId;
 use serenity::prelude::*;
-use sqlx::SqlitePool;
-use tokio::sync::OnceCell;
 
 struct Handler;
-
-static DB_POOL: Lazy<OnceCell<SqlitePool>> = Lazy::new(OnceCell::new);
-
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -28,8 +23,8 @@ impl EventHandler for Handler {
             println!("Received command interaction: {command:#?}");
 
             let content = match command.data.name.as_str() {
-                "get_ip" => commands::getip::run(&command.data.options()).await,
-                "get_stat" => commands::getstat::run(&command.data.options()).await,
+                "ip" => commands::ip::run(&command.data.options()).await,
+                "stat" => commands::stat::run(&command.data.options()).await,
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -55,8 +50,8 @@ impl EventHandler for Handler {
 
         let commands = guild_id
             .set_commands(&ctx.http, vec![
-                commands::getip::register().await,
-                commands::getstat::register().await,
+                commands::ip::register().await,
+                commands::stat::register().await,
             ])
             .await;
         match commands {
@@ -65,34 +60,6 @@ impl EventHandler for Handler {
         }
         
     }
-}
-
-// pub static DATABASE: sqlx::SqlitePool;
-
-async fn init_db() {
-    let pool = sqlx::sqlite::SqlitePoolOptions::new()
-        .max_connections(5)
-        .connect_with(
-            sqlx::sqlite::SqliteConnectOptions::new()
-                .filename("db/statistics.sqlite")
-                .create_if_missing(true)
-        ).await;
-
-    match pool {
-        Ok(db) => {
-            sqlx::migrate!("db/migrations").run(&db)
-                .await
-                .expect("Couldn't run database migrations");
-        
-            let _ = DB_POOL.set(db);
-        },
-        Err(e) => panic!("{e}")
-    }
-    // Run migrations, which updates the database's schema to the latest version.
-}
-
-fn get_db_pool() -> &'static SqlitePool {
-    DB_POOL.get().expect("Database pool not initialized")
 }
 
 #[tokio::main]
@@ -105,7 +72,7 @@ async fn main() {
 
         loop {
             println!("Beginning Update Loop");
-            update_db(get_db_pool()).await;
+            update_db().await;
             
             // Sleep for one hour (3600 seconds)
             tokio::time::sleep(time::Duration::from_secs(3600)).await;

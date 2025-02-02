@@ -1,2 +1,2 @@
-pub mod getip;
-pub mod getstat;
+pub mod ip;
+pub mod stat;
