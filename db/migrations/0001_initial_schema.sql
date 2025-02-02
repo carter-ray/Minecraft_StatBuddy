@@ -212,5 +212,5 @@ CREATE TABLE statistics (
     kill_zombie INT, 
     kill_zombie_horse INT, 
     kill_zombie_villager INT, 
-    kill_zombified_piglin INT, 
+    kill_zombified_piglin INT
 );

@@ -53,8 +53,6 @@ pub async fn update_db() {
             cmds.push(format!("scoreboard players list {username}"));
         }
     }
-
-    println!("Commands: {:#?}", cmds);
     
     query_rcon_server(addr_port, rcon_pw, cmds).await;
 

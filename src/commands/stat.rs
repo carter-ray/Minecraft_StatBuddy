@@ -44,7 +44,7 @@ pub async fn register() -> CreateCommand {
         CommandOptionType::String,
         "statistic",
         "Choose Crafting Statistic",
-        StatCategory::Mine
+        StatCategory::Use
     );
 
     // BREAK_STATS
@@ -52,7 +52,7 @@ pub async fn register() -> CreateCommand {
         CommandOptionType::String,
         "statistic",
         "Choose Crafting Statistic",
-        StatCategory::Mine
+        StatCategory::Break
     );
 
     // TRAVEL_STATS
@@ -60,7 +60,7 @@ pub async fn register() -> CreateCommand {
         CommandOptionType::String,
         "statistic",
         "Choose Crafting Statistic",
-        StatCategory::Mine
+        StatCategory::Travel
     );
 
     // MISC_STATS
@@ -68,7 +68,7 @@ pub async fn register() -> CreateCommand {
         CommandOptionType::String,
         "statistic",
         "Choose Crafting Statistic",
-        StatCategory::Mine
+        StatCategory::Misc
     );
 
     // KILL / KILLED BY (max 25 options, can't use options)
