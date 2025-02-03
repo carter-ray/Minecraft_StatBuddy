@@ -15,10 +15,10 @@ pub fn get_stat_vec(stat_type: StatCategory) -> Vec<&'static str> {
     match stat_type {
         StatCategory::General   => GENERAL_STATS.to_vec(),
         StatCategory::Craft     => CRAFT_STATS.to_vec(),
-        StatCategory::Mine      => BREAK_STATS.to_vec(),
-        StatCategory::Use       => TRAVEL_STATS.to_vec(),
-        StatCategory::Break     => MINE_STATS.to_vec(),
-        StatCategory::Travel    => USE_STATS.to_vec(),
+        StatCategory::Mine      => MINE_STATS.to_vec(),
+        StatCategory::Break     => BREAK_STATS.to_vec(),
+        StatCategory::Use       => USE_STATS.to_vec(),
+        StatCategory::Travel    => TRAVEL_STATS.to_vec(),
         StatCategory::Misc      => MISC_STATS.to_vec(),
         StatCategory::Kill      => KILL_STATS.to_vec(),
         StatCategory::KilledBy  => KILLED_BY_STATS.to_vec(),
@@ -30,6 +30,8 @@ pub fn get_stat_vec(stat_type: StatCategory) -> Vec<&'static str> {
             all.extend(TRAVEL_STATS.iter());
             all.extend(MINE_STATS.iter());
             all.extend(USE_STATS.iter());
+            all.extend(KILL_STATS.iter());
+            all.extend(KILLED_BY_STATS.iter());
             all.extend(MISC_STATS.iter());
             all
         }

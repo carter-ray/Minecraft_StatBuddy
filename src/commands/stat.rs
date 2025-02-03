@@ -1,16 +1,66 @@
-
-
 use serenity::all::{CommandOptionType, CreateCommandOption};
 use serenity::builder::CreateCommand;
-use serenity::model::application::ResolvedOption;
+use serenity::model::application::{ResolvedOption, ResolvedValue};
+
+use sqlx::Row;
 
 use crate::constants::{get_stat_vec, StatCategory};
-
-
+use crate::dbfuncs::query_db;
 
 pub async fn run(options: &[ResolvedOption<'_>]) -> Option<String> {
-    println!("{:?}", options);
-    Some("TODO".to_string())
+    let mut player: String = String::new();
+    let mut stat: String = String::new();
+    match &options[0].value {
+        ResolvedValue::SubCommand(subcmds) => {
+            for subcmd in subcmds {
+                match subcmd.name {
+                    "statistic" => {
+                        match subcmd.value {
+                            ResolvedValue::String(val) => stat.push_str(val),
+                            _ => {},
+                        }
+                    },
+                    "player" => {
+                        match subcmd.value {
+                            ResolvedValue::String(val) => player.push_str(val),
+                            _ => {},
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        _ => {}
+    };
+
+
+    let mut query: String = format!("SELECT \"{}\" FROM statistics", stat);
+    if player != "" {
+        query += format!(" WHERE username = \"{}\"", &player).as_str();
+        query += format!(" ORDER BY \"{}\" DESC", stat).as_str();
+    }
+    query += ";";
+
+    println!("{}", query);
+
+    let result = query_db(query.as_str()).await;
+
+    let mut response: String = String::new();
+    for (i, row) in result.iter().enumerate() {
+        if stat == "" {
+            continue;
+        }
+        response.push_str(&player);
+        response.push_str(": ");
+        response.push_str(row.try_get(&*stat).unwrap());
+        if i != result.len() - 1 {
+            response.push_str("\n");
+        }
+    }
+    if response == "" {
+        response.push_str("Not a valid user");
+    }
+    Some(response)
 }
 
 pub async fn register() -> CreateCommand {
@@ -179,7 +229,7 @@ fn init_choices(kind: CommandOptionType, name: &str, description: &str, choice_t
         name,
         description,
     );
-    
+    cmd_option = cmd_option.required(true);
     for choice in get_stat_vec(choice_type) {
         cmd_option = cmd_option.add_string_choice(choice.to_string(), choice.to_string());
     }

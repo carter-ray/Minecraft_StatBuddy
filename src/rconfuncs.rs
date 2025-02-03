@@ -1,31 +1,42 @@
+use std::{collections::HashMap, vec};
+
 use rcon::{AsyncStdStream, Connection};
 
-pub async fn query_rcon_server(addr_port: String, rcon_pw: String, cmds: Vec<String>) -> Vec<String> {
-    let mut responses: Vec<String> = Vec::with_capacity(cmds.len());
-    
+use crate::CONFIG;
+
+pub async fn query_rcon_server(cmds: &mut HashMap<String, String>) {    
     let connection = <Connection<AsyncStdStream>>::builder()
         .enable_minecraft_quirks(true)
-        .connect(&addr_port, rcon_pw.as_str())
+        .connect(&CONFIG.rcon_addr_port, &CONFIG.rcon_pw)
         .await;
     
     match connection {
         Ok(mut conn) => {
             println!("Connected to RCON server");     
-            for cmd in cmds.iter() {
+            for (_, cmd) in cmds.iter_mut() {
                 let resp: Result<String, rcon::Error> = Connection::cmd(&mut conn, &cmd).await;
                 match resp {
                     Ok(returned_data) => {
-                        println!("{}", &returned_data);
-                        responses.push(returned_data);
+                        *cmd = returned_data;
                     },
                     Err(e) => {
-                        println!("{}", e);
-                        responses.push("".to_string());
+                        println!("Error in rcon server connection: {}", e);
+                        *cmd = "NULL".to_string();
                     },
                 }
             }
-            responses
         },
-        Err(_) => panic!("Could not connect to RCON server {}", &addr_port)
+        Err(_) => panic!("Could not connect to RCON server {}", &CONFIG.rcon_addr_port)
     }
+}
+
+pub async fn get_whitelist() -> Vec<String> {
+    // let players: Vec<String> = query_rcon_server(vec!["whitelist list".to_string()]).await[0]
+    //     .split(":")
+    //     .collect::<Vec<&str>>()[1]
+    //     .split(",")
+    //     .map(|item| item.trim().to_string())
+    //     .collect();
+    // players
+    vec!["xCalamitousx".to_string()]
 }
