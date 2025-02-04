@@ -10,13 +10,29 @@ use crate::dbfuncs::query_db;
 pub async fn run(options: &[ResolvedOption<'_>]) -> Option<String> {
     let mut player: String = String::new();
     let mut stat: String = String::new();
+    let opt = options[0].name;
     match &options[0].value {
         ResolvedValue::SubCommand(subcmds) => {
             for subcmd in subcmds {
                 match subcmd.name {
+                    "mob" => {
+                        match subcmd.value {
+                            ResolvedValue::String(val) => {
+                                if opt == "kill" {
+                                    stat.push_str("kill_");
+                                } else if opt == "killed_by" {
+                                    stat.push_str("killed_by_");
+                                }
+                                stat.push_str(&val.replace(" ", "_"));
+                            },
+                            _ => {},
+                        }
+                    },
                     "statistic" => {
                         match subcmd.value {
-                            ResolvedValue::String(val) => stat.push_str(val),
+                            ResolvedValue::String(val) => {
+                                stat.push_str(val);
+                            },
                             _ => {},
                         }
                     },
@@ -31,28 +47,27 @@ pub async fn run(options: &[ResolvedOption<'_>]) -> Option<String> {
             }
         }
         _ => {}
-    };
+    }
 
-
-    let mut query: String = format!("SELECT \"{}\" FROM statistics", stat);
+    let mut query: String = format!("SELECT username, \"{}\" FROM statistics", stat);
     if player != "" {
         query += format!(" WHERE username = \"{}\"", &player).as_str();
+    } else {
         query += format!(" ORDER BY \"{}\" DESC", stat).as_str();
     }
     query += ";";
 
-    println!("{}", query);
-
-    let result = query_db(query.as_str()).await;
+    let result: Vec<sqlx::sqlite::SqliteRow> = query_db(query.as_str()).await;
 
     let mut response: String = String::new();
+    response.push_str(&format!("**{}:**\n", &stat));
     for (i, row) in result.iter().enumerate() {
         if stat == "" {
             continue;
         }
-        response.push_str(&player);
+        response.push_str(&row.try_get::<String, _>("username").unwrap().to_string());
         response.push_str(": ");
-        response.push_str(row.try_get(&*stat).unwrap());
+        response.push_str(&row.try_get::<u64, _>(&*stat).unwrap().to_string());
         if i != result.len() - 1 {
             response.push_str("\n");
         }
@@ -193,15 +208,6 @@ pub async fn register() -> CreateCommand {
         )
         .add_option(
             CreateCommandOption::new(
-                CommandOptionType::SubCommand,
-                "misc",
-                "Statistics about Misc. things"
-            )
-            .add_sub_option(misc_stat_opts)
-            .add_sub_option(player_filter.clone())
-        )
-        .add_option(
-            CreateCommandOption::new(
                 CommandOptionType::SubCommand, 
                 "kill",
                 "Number of mobs killed"
@@ -216,6 +222,15 @@ pub async fn register() -> CreateCommand {
                 "Number of deaths to a mob"
             )
             .add_sub_option(mob_opts)
+            .add_sub_option(player_filter.clone())
+        )
+        .add_option(
+            CreateCommandOption::new(
+                CommandOptionType::SubCommand,
+                "misc",
+                "Statistics about Misc. things"
+            )
+            .add_sub_option(misc_stat_opts)
             .add_sub_option(player_filter)
         )
         

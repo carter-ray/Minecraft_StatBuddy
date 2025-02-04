@@ -1,4 +1,4 @@
-use std::{collections::HashMap, vec};
+use std::collections::HashMap;
 
 use rcon::{AsyncStdStream, Connection};
 
@@ -31,12 +31,17 @@ pub async fn query_rcon_server(cmds: &mut HashMap<String, String>) {
 }
 
 pub async fn get_whitelist() -> Vec<String> {
-    // let players: Vec<String> = query_rcon_server(vec!["whitelist list".to_string()]).await[0]
-    //     .split(":")
-    //     .collect::<Vec<&str>>()[1]
-    //     .split(",")
-    //     .map(|item| item.trim().to_string())
-    //     .collect();
-    // players
-    vec!["xCalamitousx".to_string()]
+    let mut cmd: HashMap<String, String> = HashMap::new();
+    cmd.insert("0".to_string(), "whitelist list".to_string());
+
+    query_rcon_server(&mut cmd).await;
+
+    let players: Vec<String> = cmd.get("0")
+        .unwrap()
+        .split(":")
+        .collect::<Vec<&str>>()[1]
+        .split(",")
+        .map(|item| item.trim().to_string())
+        .collect();
+    players
 }

@@ -45,8 +45,6 @@ pub static CONFIG: Lazy<Config> = Lazy::new(|| {
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
-            println!("Received command interaction: {command:#?}");
-
             let content = match command.data.name.as_str() {
                 "ip" => commands::ip::run(&command.data.options()).await,
                 "stat" => commands::stat::run(&command.data.options()).await,

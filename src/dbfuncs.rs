@@ -45,18 +45,17 @@ pub async fn update_db() {
         cmds.insert(username, val);
     }
     query_rcon_server(&mut cmds).await;
-    
+
     let re: Regex = Regex::new(r"\[([\w ]+)\]: *([\w\d]+)").unwrap();
 
     for (user, result) in cmds {
         let mut col_stat_map: HashMap<String, String> = HashMap::new();
-    
+        
         for cap in re.captures_iter(&result) {
             if let (Some(name), Some(stat)) = (cap.get(1), cap.get(2)) {
                 col_stat_map.insert(name.as_str().to_string().replace(" ", "_").replace("'", "").to_lowercase(), stat.as_str().parse().unwrap());
             }
         }
-
         
         let cols: Vec<String> = get_stat_vec(StatCategory::All)
             .into_iter()
@@ -64,14 +63,14 @@ pub async fn update_db() {
             .collect();
 
         let vals: Vec<String> = cols.iter().map(|col| {
-            col_stat_map.get(col).map(|val| val.to_string()).unwrap_or_else(|| col.to_owned())
+            col_stat_map.get(col).map(|val| val.to_string()).unwrap_or_else(|| "0".to_string())
         }).collect();
 
         let query = format!(
             "INSERT OR REPLACE INTO statistics (username, {}) VALUES ({}, {})",
             cols.join(", "),
-            user,
-            vals.join(", ")
+            format!("{}{}{}", "\"", user, "\""),
+            vals.join(", "),
         );
 
         post_db(&query).await;
@@ -87,7 +86,10 @@ pub async fn query_db(query: &str) -> Vec<SqliteRow> {
 }
 
 pub async fn post_db(cmd: &str) {
-    let _ = sqlx::query(&cmd)
-        .execute(get_db_pool());
+    match sqlx::query(&cmd)
+        .execute(get_db_pool()).await {
+            Err(e) => println!("{}", e),
+            _ => {}
+        }
 }
 
