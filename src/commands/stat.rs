@@ -60,7 +60,7 @@ pub async fn run(options: &[ResolvedOption<'_>]) -> Option<String> {
     let result: Vec<sqlx::sqlite::SqliteRow> = query_db(query.as_str()).await;
 
     let mut response: String = String::new();
-    response.push_str(&format!("**{}:**\n", &stat));
+    response.push_str(&format!("# {}:\n", &stat));
     for (i, row) in result.iter().enumerate() {
         if stat == "" {
             continue;

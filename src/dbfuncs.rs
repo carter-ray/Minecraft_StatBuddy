@@ -11,6 +11,7 @@ use crate::{constants::{get_stat_vec, StatCategory}, rconfuncs::{get_whitelist, 
 static DB_POOL: Lazy<OnceCell<SqlitePool>> = Lazy::new(OnceCell::new);
 
 pub async fn init_db() {
+    
     let pool = sqlx::sqlite::SqlitePoolOptions::new()
         .max_connections(5)
         .connect_with(

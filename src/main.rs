@@ -3,11 +3,12 @@ mod dbfuncs;
 mod rconfuncs;
 pub mod constants;
 
-use std::{env, time};
 use dbfuncs::{init_db, update_db};
+use serde::Deserialize;
 
-use dotenv::dotenv;
-
+use std::io::BufReader;
+use std::time;
+use std::fs::File;
 use once_cell::sync::Lazy;
 use serenity::async_trait;
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage};
@@ -16,8 +17,10 @@ use serenity::model::gateway::Ready;
 use serenity::model::id::GuildId;
 use serenity::prelude::*;
 
+
 struct Handler;
 
+#[derive(Debug, Deserialize)]
 pub struct Config{
     discord_token: String,
     guild_id: u64,
@@ -27,16 +30,10 @@ pub struct Config{
 }
 
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
-    dotenv().ok();
-    let x: String = String::new();
-    Config {
-        discord_token: env::var("DISCORD_TOKEN").unwrap_or_else(|_| x.clone()),
-        guild_id: env::var("GUILD_ID").expect("no GUILD_ID provided").parse().expect("Could not parse GUILD_ID as int"),
-        global_server_addr: env::var("GLOBAL_SERVER_ADDR").unwrap_or_else(|_| x.clone()),
-        rcon_addr_port: env::var("RCON_ADDR_PORT").unwrap_or_else(|_| x.clone()),
-        rcon_pw: env::var("RCON_PW").unwrap_or_else(|_| x.clone()),
-    }
-    
+    let file = File::open("config.json").expect("Failed to open config.json");
+    let reader = BufReader::new(file);
+
+    serde_json::from_reader(reader).expect("Failed to parse config.json")
 });
 
 
