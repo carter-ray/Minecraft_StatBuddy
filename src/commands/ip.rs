@@ -8,12 +8,13 @@ use crate::CONFIG;
 
 pub async fn run(_options: &[ResolvedOption<'_>]) -> Option<String> {
     let server_addr = &CONFIG.global_server_addr;
-    if let Some("localhost") = server_addr.split(":").next() {
+    let mut server_addr_vec = server_addr.split(":");
+    if let Some("localhost") = server_addr_vec.next() {
         let ip_api: &str = "https://api.ipify.org?format=text"; 
         match reqwest::get(ip_api).await {
             Ok(response) => {
                 match response.text().await {
-                    Ok(ip_addr) => Some(format!("Public IP Addrss: {}", ip_addr)),
+                    Ok(ip_addr) => Some(format!("Public IP Addrss: {}:{}", ip_addr, server_addr_vec.next().unwrap())),
                     Err(e) => {
                         eprintln!("Failed to parse response from IP API: {:?}", e);
                         Some("Could not get Public IP Address".to_string())
@@ -29,7 +30,7 @@ pub async fn run(_options: &[ResolvedOption<'_>]) -> Option<String> {
         match lookup_host(&CONFIG.global_server_addr).await {
             Ok(mut ip) => {
                 let ip_addr: String = ip.next().unwrap().to_string();
-                let output = format!("Resolved {:#?} to {:#?}", &CONFIG.global_server_addr, ip_addr);
+                let output = format!("Resolved {:?} to {:?}", &CONFIG.global_server_addr, ip_addr);
                 Some(output)
             },
             Err(e) => {
