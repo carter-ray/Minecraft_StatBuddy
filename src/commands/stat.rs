@@ -1,10 +1,12 @@
+use std::vec;
+
 use serenity::all::{CommandOptionType, CreateCommandOption};
 use serenity::builder::CreateCommand;
 use serenity::model::application::{ResolvedOption, ResolvedValue};
 
 use sqlx::Row;
 
-use crate::constants::{get_stat_vec, StatCategory};
+use crate::constants::StatCategory;
 use crate::dbfuncs::query_db;
 
 pub async fn run(options: &[ResolvedOption<'_>]) -> Option<String> {
@@ -57,23 +59,41 @@ pub async fn run(options: &[ResolvedOption<'_>]) -> Option<String> {
     }
     query += ";";
 
+    
     let result: Vec<sqlx::sqlite::SqliteRow> = query_db(query.as_str()).await;
-
+    
+    let mut widths: Vec<usize> = vec![0, 0];
+    for row in &result {
+        let mut x: usize = row.try_get::<String, _>("username").unwrap().to_string().len();
+        if x > widths[0] {
+            widths[0] = x
+        }
+        x = row.try_get::<u64, _>(&*stat).unwrap().to_string().len();
+        if x > widths[1] {
+            widths[1] = x
+        }
+    }
+    widths.iter_mut().for_each(|x| *x += 2);
+    
     let mut response: String = String::new();
     response.push_str(&format!("# {}:\n", &stat));
+    response.push_str("```");
     for (i, row) in result.iter().enumerate() {
-        if stat == "" {
-            continue;
-        }
-        response.push_str(&row.try_get::<String, _>("username").unwrap().to_string());
+        let user: String = row.try_get::<String, _>("username").unwrap().to_string();
+        response.push_str(format!("{:<width$}", user, width = widths[0]).as_str());
+        
         response.push_str(": ");
-        response.push_str(&row.try_get::<u64, _>(&*stat).unwrap().to_string());
+
+        let val = row.try_get::<u64, _>(&*stat).unwrap().to_string();
+        response.push_str(format!("{:>width$}", val, width = widths[1]).as_str());
         if i != result.len() - 1 {
             response.push_str("\n");
         }
     }
-    if response == "" {
-        response.push_str("Not a valid user");
+    response.push_str("```");
+
+    if response == "``````" {
+        response = "Not a valid user".to_string();
     }
     Some(response)
 }
@@ -245,7 +265,7 @@ fn init_choices(kind: CommandOptionType, name: &str, description: &str, choice_t
         description,
     );
     cmd_option = cmd_option.required(true);
-    for choice in get_stat_vec(choice_type) {
+    for choice in choice_type.get_stat_vec() {
         cmd_option = cmd_option.add_string_choice(choice.to_string(), choice.to_string());
     }
     cmd_option

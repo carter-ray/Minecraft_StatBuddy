@@ -21,63 +21,19 @@ Stat Buddy is a [Discord](https://discord.com/) bot that interfaces with a home 
 
 # Commands
 
-`/server <domain|ip>` - Set the domain or IP of your minecraft server
-`/getip` - Returns the public IP address of your minecraft server
+`/ip` - Returns the public IP address of your minecraft server
+`/stat <category> <statistic_name> [player]` - Returns statistics from the minecraft server
 
-All commands can optionally be provided a player to get stats for a single player.
-
-`/playTime [player]` - Gets the playtime
-`/elyraKm [player]` - Gets the Km flown by elytra
-`/swimKm [player]` - Gets the Km swam by players
-`/MineCoal [player]` - Gets the number of Coal mined by
-`/MineCopper [player]` - Gets the number of Copper mined by players
-`/MineDiamond [player]` - Gets the number of Diamonds mined by players
-`/MineIron [player]` - Gets the number of Iron mined by players
-`/MineGold [player]` - Gets the number of Gold mined by players
-`/MineRedstone [player]` - Gets the number of Redstone mined by players
-`/MineLapis [player]` - Gets the number of Lapis mined by players
-`/MineEmerald [player]` - Gets the number of Emerald mined by players
-`/MineNetherite [player]` - Gets the number of Netherite mined by players
-`/MineQuartz [player]` - Gets the number of Quarts mined by players
-`/MineOre [player]` - Gets the total count of Ores mined by players
-`/Deaths [player]` - Gets the number of Deaths players have
-`/Crafts [player]` - Gets the number of crafts players have
-`/FurnaceUsed [player]` - Gets the number of times players have used a furnace.
-`/VillagerTrade [player]` - Gets the number of times players have traded with a villager
-`/Jump [player]` - Gets the number of times players have jumped
-`/AnimalsBred [player]` - Gets the number of times players have bred animals
-`/DamageDealt [player]` - Gets the amount of damage players have dealt
-`/DamageTaken [player]` - Gets the amount of damage players have taken
-`/Brewing [player]` - Gets the number of times players have used a Brewing stand
-`/ChestOpened [player]` - Gets the number of Chests players have opened
-`/ShulkerBox [player]` - Gets the number of Shulker Boxes players have opened
-`/EnderChest [player]` - Gets the number of Ender Chests players have opened
-`/UseTorch [player]` - Gets the number of Torches players have placed
-`/UseTotem [player]` - Gets the number of Totems of Undying players have used
-`/FishCaught [player]` - Gets the number of Fish players have caught
-`/EnchantItem [player]` - Gets the number of items enchaned by players
-`/TotalKills [player]` - Gets the total kills by players
-`/RecordsPlayed [player]` - Gets the number of Records Played by players
-`/FlowerPotted [player]` - Gets the number of Flowers Potted by players
-`/BreakAxe [player]` - Gets the number of Axes broken
-`/BreakBow [player]` - Gets the number of Bows broken
-`/BreakHoe [player]` - Gets the number of Hoes broken
-`/BreakPick [player]` - Gets the number of Picaxes broken
-`/BreakShears [player]` - Gets the number of Shears broken
-`/BreakShovel [player]` - Gets the number of Shovels broken
-`/BreakSword [player]` - Gets the number of Swords broken
-`/CraftShulkBox [player]` - Gets the number of Shulker Boxes crafted
-`/CraftEndCryst [player]` - Gets the number of End Crystals crafted
-`/CraftConduit [player]` - Gets the number of Conduits crafted
-`/CraftBeacon [player]` - Gets the number of Beacons crafted
-`/Dth [player] <mob> ` - Gets the number of player Deaths caused by a given `Mob`
-`/Kill <mob> [player]` - Gets the number of kills for the `Mob`
-`/UseEnderPearl [player]` - Gets the number of ender pearls used
-`/TuneNoteblock [player]` - Gets the number of Noteblocks tuned
-`/UseBonemeal [player]` - Gets the number of Bonemeal used
-`/UseBottleEnch [player]` - Gets the number of Bottles of Enchanting used
-`/UseBucket [player]` - Gets the number of Buckets used
-`/UseFishingRod [player]` - Gets the number of Fishing Rods used
-`/UseGoldApple [player]` - Gets the number of Golden Apples used
-`/UsePotion [player]` - Gets the number of Potions used
-`/UseTrident [player]` - Gets the number of Tridents used
+# config.json structure
+```json
+{
+	"discord_token": "<Really.Long.Discord-Token>",    // secret token for your Discord bot
+	"guild_id": 000000000000000000,                    // discord server/guild id where the bot will respond, as an integer
+	"global_server_addr": "<public_domain>:<port> |"   // assumes you have a website/domain routing to your server
+                        ":<port>",                    // assumes localhost
+	"rcon_addr_port": "<local_hostname>:<port> |"      // assumes your router implements local DNS
+                     "<local_ip_address>:<port> |"    // assumes the computer running the Minecraft Server has a static IP on the local network
+                     ":<port>",                       // assumes localhost
+	"rcon_pw": "<secure-password>"                     // RCON password
+}
+```

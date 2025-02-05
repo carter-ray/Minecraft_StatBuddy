@@ -1,32 +1,45 @@
 
-use std::collections::HashMap;
-
+use std::{collections::HashMap, fs::{self, File}, io::Write, path::Path};
 use regex::Regex;
 use sqlx::{sqlite::SqliteRow, SqlitePool};
 use once_cell::sync::Lazy;
 use tokio::sync::OnceCell;
 
-use crate::{constants::{get_stat_vec, StatCategory}, rconfuncs::{get_whitelist, query_rcon_server}};
+use crate::{constants::{StatCategory, DB_PATH, MIGRATION_CONTENT, MIGRATION_PATH}, rconfuncs::{get_whitelist, query_rcon_server}};
 
 static DB_POOL: Lazy<OnceCell<SqlitePool>> = Lazy::new(OnceCell::new);
 
+async fn write_execute_migrations() {
+    if let Some(parent) = Path::new(MIGRATION_PATH).parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+    let path = Path::new(MIGRATION_PATH);
+    let mut file = File::create(path).unwrap();
+    file.write_all(MIGRATION_CONTENT.as_bytes()).unwrap();
+
+    sqlx::migrate!("db/migrations").run(get_db_pool())
+            .await
+            .expect("Couldn't run database migrations")
+}
+
 pub async fn init_db() {
+
+    if let Some(parent) = Path::new(DB_PATH).parent() {
+        let _ = fs::create_dir_all(parent);
+    }
     
     let pool = sqlx::sqlite::SqlitePoolOptions::new()
         .max_connections(5)
         .connect_with(
             sqlx::sqlite::SqliteConnectOptions::new()
-                .filename("db/statistics.sqlite")
+                .filename(DB_PATH)
                 .create_if_missing(true)
         ).await;
 
     match pool {
         Ok(db) => {
-            sqlx::migrate!("db/migrations").run(&db)
-                .await
-                .expect("Couldn't run database migrations");
-        
             let _ = DB_POOL.set(db);
+            write_execute_migrations().await;
         },
         Err(e) => panic!("{e}")
     }
@@ -45,6 +58,7 @@ pub async fn update_db() {
         let val = format!("scoreboard players list {}", username);
         cmds.insert(username, val);
     }
+    println!("Updating DB");
     query_rcon_server(&mut cmds).await;
 
     let re: Regex = Regex::new(r"\[([\w ]+)\]: *([\w\d]+)").unwrap();
@@ -58,7 +72,7 @@ pub async fn update_db() {
             }
         }
         
-        let cols: Vec<String> = get_stat_vec(StatCategory::All)
+        let cols: Vec<String> = StatCategory::All.get_stat_vec()
             .into_iter()
             .map(|s| s.to_string())
             .collect();

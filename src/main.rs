@@ -1,13 +1,13 @@
-mod commands;
-mod dbfuncs;
-mod rconfuncs;
+pub mod commands;
+pub mod dbfuncs;
+pub mod rconfuncs;
 pub mod constants;
 
 use dbfuncs::{init_db, update_db};
 use serde::Deserialize;
 
-use std::io::BufReader;
-use std::time;
+use std::io::{self, BufReader};
+use std::{process, time};
 use std::fs::File;
 use once_cell::sync::Lazy;
 use serenity::async_trait;
@@ -29,13 +29,48 @@ pub struct Config{
     rcon_pw: String
 }
 
+fn pause_before_exit() {
+    println!("Press Enter to exit...");
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read line");
+    process::exit(1);
+}
+
+fn fix_addr(addr_port: String) -> String {
+    let mut addr_port_vec: Vec<&str> = addr_port.split(":").collect();
+    if addr_port_vec[0].len() == 0{
+        addr_port_vec[0] = "localhost";
+    }
+    else if  addr_port_vec.len() == 1{
+        addr_port_vec.insert(0, "localhost");
+    }
+    addr_port_vec.join(":")
+}
+
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
-    let file = File::open("config.json").expect("Failed to open config.json");
-    let reader = BufReader::new(file);
-
-    serde_json::from_reader(reader).expect("Failed to parse config.json")
+    match File::open("config.json") {
+        Ok(file) => {
+            let reader = BufReader::new(file);
+            match serde_json::from_reader::<_, Config>(reader) {
+                Ok(mut content) => {
+                    content.global_server_addr = fix_addr(content.global_server_addr);
+                    content.rcon_addr_port = fix_addr(content.rcon_addr_port);
+                    content
+                },
+                Err(e) => {
+                    eprintln!("Failed to parse config.json: {}", e);
+                    pause_before_exit();
+                    process::exit(1);
+                }
+            }
+        },
+        Err(e) => {
+            eprintln!("Failed to open config.json: {}", e);
+            pause_before_exit();
+            process::exit(1);
+        }
+    }
 });
-
 
 
 #[async_trait]
@@ -81,32 +116,32 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    
+    let _ = CONFIG;
+    if CONFIG.discord_token.is_empty() {
+        eprintln!("No valid config.json");
+        pause_before_exit();
+    }
+
     tokio::spawn(async {
         init_db().await;
-        println!("Connected to DB");
+        println!("initialized DB");
         
+        println!("Beginning DB Update Loop");
         loop {
-            println!("Beginning Update Loop");
             update_db().await;
-            
-            // Sleep for one hour (3600 seconds)
+            // sleep for 1 hour
             tokio::time::sleep(time::Duration::from_secs(3600)).await;
         }
     });
     
-    // Build our client.
     let mut client: Client = Client::builder(&CONFIG.discord_token, GatewayIntents::empty())
         .event_handler(Handler)
         .await
         .expect("Error creating client");
 
-    // Finally, start a single shard, and start listening to events.
-    //
-    // Shards will automatically attempt to reconnect, and will perform exponential backoff until
-    // it reconnects.
     if let Err(why) = client.start().await {
-        println!("Client error: {why:?}");
+        eprintln!("Client error: {why:?}");
+        pause_before_exit();
     }
 }
 

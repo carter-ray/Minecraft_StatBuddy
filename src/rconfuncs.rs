@@ -12,7 +12,7 @@ pub async fn query_rcon_server(cmds: &mut HashMap<String, String>) {
     
     match connection {
         Ok(mut conn) => {
-            println!("Connected to RCON server");     
+            println!("Connected to RCON server");
             for (_, cmd) in cmds.iter_mut() {
                 let resp: Result<String, rcon::Error> = Connection::cmd(&mut conn, &cmd).await;
                 match resp {
@@ -34,6 +34,7 @@ pub async fn get_whitelist() -> Vec<String> {
     let mut cmd: HashMap<String, String> = HashMap::new();
     cmd.insert("0".to_string(), "whitelist list".to_string());
 
+    println!("Getting current whitelist");
     query_rcon_server(&mut cmd).await;
 
     let players: Vec<String> = cmd.get("0")
