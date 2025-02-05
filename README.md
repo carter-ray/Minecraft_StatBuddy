@@ -22,18 +22,19 @@ Stat Buddy is a [Discord](https://discord.com/) bot that interfaces with a home 
 # Commands
 
 `/ip` - Returns the public IP address of your minecraft server
+
 `/stat <category> <statistic_name> [player]` - Returns statistics from the minecraft server
 
 # config.json structure
 ```json
 {
 	"discord_token": "<Really.Long.Discord-Token>",    // secret token for your Discord bot
-	"guild_id": 000000000000000000,                    // discord server/guild id where the bot will respond, as an integer
+	"guild_id": 999999999999999999,                    // discord server/guild id where the bot will respond, as an integer
 	"global_server_addr": "<public_domain>:<port> |"   // assumes you have a website/domain routing to your server
-                        ":<port>",                    // assumes localhost
+                        ":<port>",                         // assumes localhost
 	"rcon_addr_port": "<local_hostname>:<port> |"      // assumes your router implements local DNS
-                     "<local_ip_address>:<port> |"    // assumes the computer running the Minecraft Server has a static IP on the local network
-                     ":<port>",                       // assumes localhost
+                     "<local_ip_address>:<port> |"         // assumes the computer running the Minecraft Server has a static IP on the local network
+                     ":<port>",                            // assumes localhost
 	"rcon_pw": "<secure-password>"                     // RCON password
 }
 ```
