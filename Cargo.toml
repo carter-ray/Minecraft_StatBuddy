@@ -1,6 +1,6 @@
 [package]
 name = "mc_statbuddy"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 [dependencies]
@@ -13,3 +13,4 @@ serde_json = {version = "1.0.138"}
 serenity = "0.12.4"
 sqlx = { version = "0.8.3", features = ["sqlite", "macros", "runtime-tokio"] }
 tokio = { version = "1.43.0", features = ["net", "sync", "time", "rt-multi-thread"] }
+winres = "0.1.12"
