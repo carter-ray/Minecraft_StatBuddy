@@ -107,8 +107,16 @@ impl EventHandler for Handler {
 async fn main() {
     dotenv().ok();
     let _ = CONFIG;
-    if CONFIG.discord_token.is_empty() {
-        eprintln!("No valid .env file");
+    if CONFIG.discord_token.is_empty() || CONFIG.rcon_pw.is_empty() {
+        eprintln!("INvalid .env file.");
+        let mut missings = String::from("");
+        if CONFIG.discord_token.is_empty() {
+            missings.push_str("\n\tDISCORD_BOT_TOKEN");
+        }
+        if CONFIG.rcon_pw.is_empty() {
+            missings.push_str("\n\tRCON_PW");
+        }
+        eprintln!("Missing:{}", missings);
         pause_before_exit();
     }
 
