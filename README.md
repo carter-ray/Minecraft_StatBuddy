@@ -27,16 +27,9 @@ Stat Buddy is a [Discord](https://discord.com/) bot that interfaces with a home 
 
 # .env keys
 ```env
-DISCORD_BOT_TOKEN=<Really.Long.Discord-Token>		// secret token for your Discord bot
-GUILD_ID=999999999999999999							// discord server/guild id where the bot will respond
-GLOBAL_SERVER_ADDRESS=<public_domain>:<port>
-RCON_ADDR_PORT=
-RCON_PW=
-	"global_server_addr": "<public_domain>:<port> |"   // assumes you have a website/domain routing to your server
-                        ":<port>",                         // assumes localhost
-	"rcon_addr_port": "<local_hostname>:<port> |"      // assumes your router implements local DNS
-                     "<local_ip_address>:<port> |"         // assumes the computer running the Minecraft Server has a static IP on the local network
-                     ":<port>",                            // assumes localhost
-	"rcon_pw": "<secure-password>"                     // RCON password
-}
+DISCORD_BOT_TOKEN=<Really.Long.Discord-Token>   		      // secret token for your Discord bot
+GUILD_ID=999999999999999999							            // discord server/guild id where the bot will respond
+GLOBAL_SERVER_ADDRESS=<public_domain:port>|<:port>          // assumes localhost:25565 if missing
+RCON_ADDR_PORT=<static_ip:port>|<hostname:port>|<:port>     // assumes localhost:25575 if missing
+RCON_PW=<secure-password>
 ```

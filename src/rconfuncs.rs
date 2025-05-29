@@ -4,7 +4,7 @@ use rcon::{AsyncStdStream, Connection};
 
 use crate::CONFIG;
 
-pub async fn query_rcon_server(cmds: &mut HashMap<String, String>) {    
+pub async fn query_rcon_server(cmds: &mut HashMap<String, String>) {   
     let connection = <Connection<AsyncStdStream>>::builder()
         .enable_minecraft_quirks(true)
         .connect(&CONFIG.rcon_addr_port, &CONFIG.rcon_pw)
