@@ -1,4 +1,4 @@
-pub const  DB_PATH: &str = "db/statistics.sqlite";
+pub const DB_PATH: &str = "db/statistics.sqlite";
 pub const MIGRATION_PATH: &str = "db/migrations/0001_initial_schema.sql";
 pub const MIGRATION_CONTENT: &str = include_str!("../db/migrations/0001_initial_schema.sql");
 

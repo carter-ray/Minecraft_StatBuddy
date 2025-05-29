@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 use rcon::{AsyncStdStream, Connection};
 
@@ -26,7 +26,9 @@ pub async fn query_rcon_server(cmds: &mut HashMap<String, String>) {
                 }
             }
         },
-        Err(_) => panic!("Could not connect to RCON server {}", &CONFIG.rcon_addr_port)
+        Err(_) => {
+            panic!("Could not connect to RCON server {}", &CONFIG.rcon_addr_port);
+        }
     }
 }
 

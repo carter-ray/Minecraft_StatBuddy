@@ -6,9 +6,8 @@ pub mod constants;
 use dbfuncs::{init_db, update_db};
 use serde::Deserialize;
 
-use std::io::{self, BufReader};
+use std::io::{self};
 use std::{process, time};
-use std::fs::File;
 use once_cell::sync::Lazy;
 use serenity::async_trait;
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage};
@@ -16,7 +15,7 @@ use serenity::model::application::Interaction;
 use serenity::model::gateway::Ready;
 use serenity::model::id::GuildId;
 use serenity::prelude::*;
-
+use dotenv::dotenv;
 
 struct Handler;
 
@@ -38,7 +37,7 @@ fn pause_before_exit() {
 
 fn fix_addr(addr_port: String) -> String {
     let mut addr_port_vec: Vec<&str> = addr_port.split(":").collect();
-    if addr_port_vec[0].len() == 0{
+    if addr_port_vec[0].len() == 0 {
         addr_port_vec[0] = "localhost";
     }
     else if  addr_port_vec.len() == 1{
@@ -48,27 +47,17 @@ fn fix_addr(addr_port: String) -> String {
 }
 
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {
-    match File::open("config.json") {
-        Ok(file) => {
-            let reader = BufReader::new(file);
-            match serde_json::from_reader::<_, Config>(reader) {
-                Ok(mut content) => {
-                    content.global_server_addr = fix_addr(content.global_server_addr);
-                    content.rcon_addr_port = fix_addr(content.rcon_addr_port);
-                    content
-                },
-                Err(e) => {
-                    eprintln!("Failed to parse config.json: {}", e);
-                    pause_before_exit();
-                    process::exit(1);
-                }
-            }
-        },
-        Err(e) => {
-            eprintln!("Failed to open config.json: {}", e);
-            pause_before_exit();
-            process::exit(1);
-        }
+    let dbt = std::env::var("DISCORD_BOT_TOKEN").expect("DISCORD_BOT_TOKEN not found");
+    let gid = std::env::var("GUILD_ID").expect("GUILD_ID not found");
+    let gsa = fix_addr(std::env::var("GLOBAL_SERVER_ADDRESS").unwrap_or(":25565".to_string()));
+    let rap: String = fix_addr(std::env::var("RCON_ADDR_PORT").unwrap_or(":25575".to_string()));
+    let rcpw = std::env::var("RCON_PW").expect("RCON_PW not found");
+    Config { 
+        discord_token: dbt,
+        guild_id: gid.parse::<u64>().expect("GUILD_ID could not be parsed as a number."),
+        global_server_addr: gsa,
+        rcon_addr_port: rap, 
+        rcon_pw: rcpw
     }
 });
 
@@ -116,6 +105,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
     let _ = CONFIG;
     if CONFIG.discord_token.is_empty() {
         eprintln!("No valid config.json");
