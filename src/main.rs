@@ -108,7 +108,7 @@ async fn main() {
     dotenv().ok();
     let _ = CONFIG;
     if CONFIG.discord_token.is_empty() {
-        eprintln!("No valid config.json");
+        eprintln!("No valid .env file");
         pause_before_exit();
     }
 
